@@ -1,0 +1,28 @@
+#
+####### requirements.txt #######
+#
+###### Requirements with Version Specifiers ######
+lxml
+# tweepy dependencies
+oauthlib
+tweepy
+CouchDB
+nltk
+beautifulsoup4
+facebook-sdk
+boto
+simplejson
+jsonpickle
+statsmodels
+scikit-learn
+# geocoder dependencies
+ratelim
+click
+geocoder
+PyYAML
+Flask
+keras
+tensorflow
+h5py
+pandas
+#

@@ -1,0 +1,15 @@
+couchdb:
+  https: 
+  ip_address:
+  port:
+  login:
+  password:
+  databases:
+    tweets:
+    users:
+twitter:
+  OAuth:
+    consumer_key:
+    consumer_secret:
+    access_token:
+    access_secret:
