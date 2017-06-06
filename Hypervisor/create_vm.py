@@ -1,3 +1,6 @@
+"""create_vm.py
+Program to create vm and run ans_play.py
+"""
 import boto
 import time
 from boto.ec2.regioninfo import RegionInfo
@@ -29,6 +32,7 @@ while instance.state != 'running':
 print ('done')
 time.sleep(10)
 print(instance.__dict__)
+#saving ip_address
 f = open('host_created.txt', 'a')
 file_contents = f.write((instance.__dict__['private_ip_address']))
 file_contents = f.write('\n')
@@ -37,8 +41,15 @@ with open("host_created.txt","r") as f:
     lines=[line.rstrip() for line in f]
     for line in lines:
         hosts_.append(line)
-print(hosts_)
+#saving instance_d
+f = open('instances.txt', 'a')
+file_contents = f.write((instance.__dict__['id']))
+file_contents = f.write('\n')
+print('ip-address :' ,hosts_[len(hosts_)-1])
+print('instance_id:' ,instance.__dict__['id'])
+time.sleep(60)
 print("Running ansible playbook")
 host_list = [hosts_[len(hosts_)-1]]
+#adding to known host list
 os.system('ssh-keyscan '+ hosts_[len(hosts_)-1] +' >> ~/.ssh/known_hosts')
 os.system('python3 ans_play.py')
