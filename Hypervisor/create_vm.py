@@ -1,5 +1,6 @@
 """create_vm.py
 Program to create vm and run ans_play.py
+Authors : Ebin Joshy Nambiaparambil,Saurabh Sharma
 """
 import boto
 import time

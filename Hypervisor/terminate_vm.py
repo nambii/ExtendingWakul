@@ -1,5 +1,6 @@
 """terminate_vm.py
 To terminate a VM in fcfs mode
+Authors : Ebin Joshy Nambiaparambil,Saurabh Sharma
 """
 import boto
 import time
