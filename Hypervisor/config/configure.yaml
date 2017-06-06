@@ -1,15 +1,26 @@
-couchdb:
-  https: 
-  ip_address:
-  port:
-  login:
-  password:
-  databases:
-    tweets:
-    users:
-twitter:
-  OAuth:
-    consumer_key:
-    consumer_secret:
-    access_token:
-    access_secret:
+nectar:
+   EC2:
+    name:
+    endpoint:
+    aws_access_key_id:
+    aws_secret_access_key:
+    port:
+    path:
+    is_secure:
+    validate_certs:
+   VM:
+    v_name:
+    image_name:
+    key_name:
+    instance_type:
+    security_groups:
+    placement:
+  ansible:
+    module_path:
+    private_key_file:
+    remote_user:
+    become:
+    become_user:
+    become_method:
+    connection:
+    harvester_py:

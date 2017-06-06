@@ -1,3 +1,6 @@
+"""ans_play.py
+To download,install and run harvester Program
+"""
 from collections import namedtuple
 import json
 from ansible.executor.task_queue_manager import TaskQueueManager
@@ -6,9 +9,8 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.playbook.play import Play
 from ansible.plugins.callback import CallbackBase
 from ansible.vars import VariableManager
+import config.core as core
 
-
-import jinja2
 from tempfile import NamedTemporaryFile
 import os
 
@@ -28,9 +30,9 @@ class ResultsCollector(CallbackBase):
 
     def v2_runner_on_failed(self, result, *args, **kwargs):
         self.host_failed[result._host.get_name()] = result
-
 def main():
     hosts_=[]
+    args = core.config('nectar','EC2')
     #set the host_list
     with open("host_created.txt","r") as f:
         lines=[line.rstrip() for line in f]
@@ -39,16 +41,17 @@ def main():
     print(hosts_)
     print("Running ansible playbook")
     host_list = [hosts_[len(hosts_)-1]]
+    #prepare options into tuple
     Options = namedtuple('Options', ['connection', 'module_path', 'forks', 'remote_user',
                                  'private_key_file', 'ssh_common_args', 'ssh_extra_args', 'sftp_extra_args',
                                  'scp_extra_args', 'become', 'become_method', 'become_user', 'verbosity', 'check',])
     # initialize needed objects
     variable_manager = VariableManager()
     loader = DataLoader()
-    options = Options( module_path='/Library/Python/2.7/site-packages/ansible/modules',private_key_file='/Users/ebinjoshy/Downloads/cloud.pem',connection='smart', forks=100,
-                  remote_user='ubuntu', ssh_common_args=None, ssh_extra_args=None,
-                  sftp_extra_args=None, scp_extra_args=None, become='ubuntu', become_method='ubuntu',
-                  become_user='ubuntu', verbosity=None, check=False)
+    options = Options( module_path=args['module_path'],private_key_file=args['private_key_file'],connection=args['connection'], forks=100,
+                  remote_user=args['remote_user'], ssh_common_args=None, ssh_extra_args=None,
+                  sftp_extra_args=None, scp_extra_args=None, become=args['become'], become_method=args['become_method'],
+                  become_user=args['become_user'], verbosity=None, check=False)
 
     passwords = dict()
 
@@ -60,16 +63,15 @@ def main():
     name="Ansible Play",
     hosts=hosts_[len(hosts_)-1],
     gather_facts='no',
-    # tasks=[dict(script='/Users/ebinjoshy/Downloads/script_sentiment_analysis.sh')]
-    # tasks=[dict(action=dict(module='script', args='/Users/ebinjoshy/Downloads/script_sentiment_analysis.sh'))]
     tasks = [
             dict(action=dict(module='copy', args='src=./requirements.txt dest=./ remote_src=False')),
-            dict(action=dict(module='script', args='./script_sentiment_analysis.sh')),
-            dict(action=dict(module='git', args='repo=https://github.com/nambii/wa-harvester.git dest=./wa-harvester')),
-            dict(action=dict(module='copy', args='src=./requirements.txt dest=./ remote_src=False')),
+            dict(action=dict(module='script', args='./download_packages.sh')),
+            dict(action=dict(module='git', args='repo='+args['git']+' dest=./wa-harvester')),
+            dict(action=dict(module='copy', args='src=./configure.yaml dest=./wa-harvester/ remote_src=False')),
+            dict(action=dict(module='shell', args='python3 ' +args['harvester_py']+' ')),
+
          ]
     )
-
     print(play_source)
     play = Play().load(play_source, variable_manager=variable_manager, loader=loader)
     print(play)
@@ -91,16 +93,19 @@ def main():
         if tqm is not None:
             tqm.cleanup()
 
-    # print("UP ***********",callback.host,callback.host_failed)
-    for host, result in callback.host_ok.items():
-        print('{} >>> {}'.format(host, result._result['stdout']))
 
-    print("FAILED *******",callback.host_failed.items())
-    for host, result in callback.host_failed.items():
+    for host, result in callback.host_ok.items():
+        print("UP ***********")
         print('{} >>> {}'.format(host, result.__dict__))
 
-    print("DOWN *********")
+
+    for host, result in callback.host_failed.items():
+        print("FAILED *******")
+        print('{} >>> {}'.format(host, result.__dict__))
+
+
     for host, result in callback.host_unreachable.items():
-        print('{} >>> {}'.format(host, result._result['msg']))
+        print("DOWN *********")
+        print('{} >>> {}'.format(host, result.__dict__))
 if __name__ == '__main__':
     main()

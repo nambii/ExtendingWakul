@@ -9,7 +9,7 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.playbook.play import Play
 from ansible.plugins.callback import CallbackBase
 from ansible.vars import VariableManager
-
+import config.core as core
 
 from tempfile import NamedTemporaryFile
 import os
@@ -31,15 +31,16 @@ class ResultsCollector(CallbackBase):
     def v2_runner_on_failed(self, result, *args, **kwargs):
         self.host_failed[result._host.get_name()] = result
 def main():
-    hosts=[]
+    hosts_=[]
+    args = core.config('nectar','EC2')
     #set the host_list
-    with open("hosts.txt","r") as f:
+    with open("host_created.txt","r") as f:
         lines=[line.rstrip() for line in f]
         for line in lines:
-            hosts.append(line)
+            hosts_.append(line)
+    print(hosts_)
     print("Running ansible playbook")
-    host_list = hosts[len(hosts)-1]
-    print(host_list)
+    host_list = [hosts_[len(hosts_)-1]]
     #prepare options into tuple
     Options = namedtuple('Options', ['connection', 'module_path', 'forks', 'remote_user',
                                  'private_key_file', 'ssh_common_args', 'ssh_extra_args', 'sftp_extra_args',
@@ -47,10 +48,10 @@ def main():
     # initialize needed objects
     variable_manager = VariableManager()
     loader = DataLoader()
-    options = Options( module_path='/Library/Python/2.7/site-packages/ansible/modules',private_key_file='/Users/ebinjoshy/Downloads/cloud.pem',connection='smart', forks=100,
-                  remote_user='ubuntu', ssh_common_args=None, ssh_extra_args=None,
-                  sftp_extra_args=None, scp_extra_args=None, become='ubuntu', become_method='ubuntu',
-                  become_user='ubuntu', verbosity=None, check=False)
+    options = Options( module_path=args['module_path'],private_key_file=args['private_key_file'],connection=args['connection'], forks=100,
+                  remote_user=args['remote_user'], ssh_common_args=None, ssh_extra_args=None,
+                  sftp_extra_args=None, scp_extra_args=None, become=args['become'], become_method=args['become_method'],
+                  become_user=args['become_user'], verbosity=None, check=False)
 
     passwords = dict()
 
@@ -60,14 +61,14 @@ def main():
 
     play_source = dict(
     name="Ansible Play",
-    hosts='144.6.226.82',
+    hosts=hosts_[len(hosts_)-1],
     gather_facts='no',
     tasks = [
             dict(action=dict(module='copy', args='src=./requirements.txt dest=./ remote_src=False')),
-            dict(action=dict(module='script', args='./script_sentiment_analysis.sh')),
-            dict(action=dict(module='git', args='repo=https://github.com/nambii/wa-harvester.git dest=./wa-harvester')),
+            dict(action=dict(module='script', args='./download_packages.sh')),
+            dict(action=dict(module='git', args='repo='+args['git']+' dest=./wa-harvester')),
             dict(action=dict(module='copy', args='src=./configure.yaml dest=./wa-harvester/ remote_src=False')),
-            dict(action=dict(module='shell', args='python3 ./wa-harvester/harvester/twitter.py')),
+            dict(action=dict(module='shell', args='python3 ' +args['harvester_py']+' ')),
 
          ]
     )
