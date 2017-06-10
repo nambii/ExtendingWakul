@@ -34,8 +34,8 @@ VALIDATION_SPLIT = 0.2
 # first, build index mapping words in the embeddings set
 # to their embedding vector
 def SentimentCheck(text) :
-    file1=Path("files/model_new.json")
-    # if model_new.jsom doesn't exist
+    file1=Path("files/trained_model.json")
+    # if trained_model.jsom doesn't exist
     if(not file1.exists()) :
         print('Indexing word vectors.')
         embeddings_index = {}
@@ -81,7 +81,7 @@ def SentimentCheck(text) :
         data = pad_sequences(sequences, maxlen=MAX_SEQUENCE_LENGTH)
 
         test_data= pad_sequences(test_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-        print("afsas",test_data)
+
         labels = to_categorical(labels)
         print("Tasdas",labels[0:3])
         print('Shape of data tensor:', data.shape)
@@ -127,10 +127,10 @@ def SentimentCheck(text) :
 
         model_json = model.to_json()
         #save the model
-        with open("files/model_new.json", "w") as json_file:
+        with open("files/trained_model.json", "w") as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5 ans save in files folder
-        model.save_weights("files/model_new.h5")
+        model.save_weights("files/trained_model.h5")
         print("Saved model to disk")
     else:
         with open('files/training_data.pickle','rb') as f:  # Python 3: open(..., 'rb')
@@ -143,12 +143,12 @@ def SentimentCheck(text) :
         test_sequences = tokenizer.texts_to_sequences(test_review)
         print("Loaded model from disk")
         test_data= pad_sequences(test_sequences, maxlen=MAX_SEQUENCE_LENGTH)
-    json_file = open('files/model_new.json', 'r')
+    json_file = open('files/trained_model.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
     model = model_from_json(loaded_model_json)
     # load weights into new model
-    model.load_weights("files/model_new.h5")
+    model.load_weights("files/trained_model.h5")
     model.compile(loss='binary_crossentropy',
                   optimizer = 'adam',
                   metrics=["accuracy"])
