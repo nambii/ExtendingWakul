@@ -48,7 +48,7 @@ def SentimentCheck(text) :
 
         print('Found %s word vectors.' % len(embeddings_index))
         #read the traininf data
-        train = pd.read_csv("labeledTrainData.tsv", header=0, \
+        train = pd.read_csv("files/labeledTrainData.tsv", header=0, \
                             delimiter="\t", quoting=3)
         print(train.shape)
 
